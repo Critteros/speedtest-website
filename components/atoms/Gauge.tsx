@@ -26,7 +26,6 @@ const Gauge = ({ className, id, colors, value }: Props) => {
       />
       <span className="text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl">{value}</span>
     </div>
-    // colors={['#0ea5e9', '#22c55e']}
   );
 };
 

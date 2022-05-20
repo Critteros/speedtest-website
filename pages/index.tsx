@@ -8,7 +8,7 @@ const Home = () => {
         <title>Speedtest</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <SpeedtestUI id={'speedTest'} colors={['#0ea5e9', '#22c55e']} className="h-full w-full" />
+      <SpeedtestUI id="speedTest" colors={['#0ea5e9', '#22c55e']} className="h-full w-full" />
     </div>
   );
 };
