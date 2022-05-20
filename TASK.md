@@ -7,14 +7,15 @@ Wejście na stronę powinno uruchomić automatycznie pomiar prędkości ściąga
 
 ## Frontend
 
-react
-typescript
-licznik postępu (gague)
-storybook per każdy komponent, który jest rysowany w UI (np. gauge)
-webpack
-testy jednostkowe
-podsumowanie pomiarów
-zachęcająca grafika/kompozycja/wygląd aplikacji
+- react
+- typescript
+- licznik postępu (gague)
+- storybook przynajmniej na jeden komponent, który jest rysowany w UI (np. gauge)
+- webpack
+- testy jednostkowe
+- podsumowanie pomiarów
+- zachęcająca grafika/kompozycja/wygląd aplikacji
+
 
 
 ## Backend
