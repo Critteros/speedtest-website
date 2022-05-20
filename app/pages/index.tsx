@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import SpeedtestUI from '../components/organism/SpeedtestUI';
 
+
 const Home = () => {
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-slate-900">
