@@ -1,22 +1,53 @@
 import dotenv from 'dotenv';
-import express from 'express';
-import { createServer } from 'http';
 import { Server } from 'socket.io';
-import cors from 'cors';
+import log4js, { Configuration } from 'log4js';
+import * as crypto from 'crypto';
+import type { ServerToClientEvents, ClientToServerEvents } from '../types/socket';
 
 dotenv.config();
 
+const loggerConfiguration: Configuration = {
+  appenders: {
+    out: {
+      type: 'stdout',
+      layout: {
+        type: 'pattern',
+        pattern: '[%[%p%]]%[ %d{dd/MM/yyy hh:mm:ss} (%f{2})%] %m%n',
+      },
+    },
+  },
+  categories: { default: { appenders: ['out'], level: 'warning', enableCallStack: true } },
+};
+loggerConfiguration.categories.default.level = 'trace';
+log4js.configure(loggerConfiguration);
+const logger = log4js.getLogger();
 
-const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, { path: '/', cors: { origin: '*' } });
-
-io.on('connection', () => {
-  console.log('connection');
+const io = new Server<ClientToServerEvents, ServerToClientEvents>({
+  path: '/',
+  cors: { origin: process.env['FRONTEND_URL'] },
+  maxHttpBufferSize: 1e8,
 });
 
-io.on('connect_error', (err) => {
-  console.log(`connect_error due to ${err.message}`);
+io.on('connection', (socket) => {
+  logger.info(`New connection from ${socket.handshake.address}`);
+
+  socket.on('disconnect', (reason) => {
+    logger.info(`Disconnected reason: ${reason}`);
+  });
+
+  socket.on('requestBytes', (count) => {
+    logger.trace(`Sending ${count} random bytes`);
+    //Precalculating bytes
+    const bytes = crypto.randomBytes(count);
+    socket.emit('receiveBytes', Date.now(), bytes);
+  });
+
+  socket.on('uploadBytes', () => {
+    logger.trace('Uploading bytes');
+    socket.emit('uploadTime', Date.now());
+  });
+
 });
-app.use(cors());
-httpServer.listen(process.env['port']);
+
+
+io.listen(parseInt(process.env['PORT'] || '3000'));

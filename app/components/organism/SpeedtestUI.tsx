@@ -1,28 +1,37 @@
 import Gauge from '../atoms/Gauge';
 import StopRestartControls from '../molecules/StopRestartControls';
-import * as socketio from 'socket.io-client';
 import { useEffect } from 'react';
+import { useSpeedTest } from '../../hooks/useSpeedTest';
 
 type Props = {
   className?: string;
   id: string;
-  colors?: string[];
+  downloadTestColors?: string[];
+  uploadTestColors?: string[];
 };
 
-// io do not accept for some reason type string|undefined
-const backendURL = process.env['NEXT_PUBLIC_BACKEND_URL'] ?? '';
-const socket = socketio.connect(backendURL);
+const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Props) => {
+  const { startSpeedTest, benchmarkingPhase } = useSpeedTest(10);
 
-const SpeedtestUI = ({ className, id, colors }: Props) => {
   useEffect(() => {
-    const backendUrl = process.env['NEXT_PUBLIC_BACKEND_URL'];
-    socket.emit('TEST', 'data');
-    console.log(socket.active);
-    console.log(backendUrl);
-  }, []);
+    (async () => {
+      await startSpeedTest();
+    })();
+  }, [startSpeedTest]);
+
+  if (benchmarkingPhase === 'finished') {
+    return <div></div>;
+  }
+
   return (
-    <div className={`flex flex-col items-center justify-center ${className ? className : ''}`}>
-      <Gauge id={id} colors={colors} className="w-full sm:w-11/12" value={10} />
+    <div className={`flex flex-col items-center justify-center gap-3 ${className || ''}`}>
+      <Gauge
+        id={id}
+        colors={benchmarkingPhase.action === 'downloading' ? downloadTestColors : uploadTestColors}
+        maxValue={1000}
+        className="w-full sm:w-11/12"
+        value={benchmarkingPhase.currentValue}
+      />
       <StopRestartControls />
     </div>
   );
