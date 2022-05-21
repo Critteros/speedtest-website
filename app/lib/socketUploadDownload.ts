@@ -8,13 +8,12 @@ export const timeDownloadChunk = (
   socket: Socket<ServerToClientEvents, ClientToServerEvents>,
   chunkSize: number,
 ) => {
-  const downloadStart = Date.now();
   socket.emit('requestBytes', chunkSize);
 
   return new Promise<number>((resolve) => {
-    socket.once('receiveBytes', () => {
+    socket.once('receiveBytes', (timestamp) => {
       const afterDownload = Date.now();
-      resolve(afterDownload - downloadStart);
+      resolve(afterDownload - timestamp);
     });
   });
 };

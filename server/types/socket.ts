@@ -1,6 +1,6 @@
 export interface ServerToClientEvents {
-  receiveBytes: (data: Buffer) => void;
-  uploadTime: (timestamp: Date) => void;
+  receiveBytes: (timestamp: number, data: Buffer) => void;
+  uploadTime: (timestamp: number) => void;
 }
 
 export interface ClientToServerEvents {

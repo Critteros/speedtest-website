@@ -11,16 +11,27 @@ type Props = {
 };
 
 const SpeedtestUI = ({ className, id, colors }: Props) => {
-  const { startDownloadTest } = useSpeedTest();
+  const { startSpeedTest, benchmarkingPhase } = useSpeedTest(10);
 
   useEffect(() => {
     (async () => {
-      await startDownloadTest();
+      await startSpeedTest();
     })();
   }, []);
+
+  const gaugeValue = benchmarkingPhase?.currentValue || 0;
+
   return (
-    <div className={`flex flex-col items-center justify-center ${className ? className : ''}`}>
-      <Gauge id={id} colors={colors} className="w-full sm:w-11/12" value={10} />
+    <div
+      className={`flex flex-col items-center justify-center gap-3 ${className ? className : ''}`}
+    >
+      <Gauge
+        id={id}
+        colors={colors}
+        maxValue={1000}
+        className="w-full sm:w-11/12"
+        value={gaugeValue}
+      />
       <StopRestartControls />
     </div>
   );

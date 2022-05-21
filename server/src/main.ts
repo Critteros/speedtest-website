@@ -36,7 +36,9 @@ io.on('connection', (socket) => {
 
   socket.on('requestBytes', (count) => {
     console.log(`Sending ${count} random bytes`);
-    socket.emit('receiveBytes', crypto.randomBytes(count));
+    //Precalculating bytes
+    const bytes = crypto.randomBytes(count);
+    socket.emit('receiveBytes', Date.now(), bytes);
   });
 
 });

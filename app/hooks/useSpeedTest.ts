@@ -2,50 +2,77 @@ import { useEffect, useRef, useState } from 'react';
 import * as socketio from 'socket.io-client';
 import type { ServerToClientEvents, ClientToServerEvents } from '@backend/types/socket';
 import { timeDownloadChunk, inCSUnits, throughput } from '../lib/socketUploadDownload';
+import { throttle, mean, round } from 'lodash';
 
-type DownloadSpeedStats = {
-  currentDownloadSpeed: number;
-  averageDownloadSpeed: number | undefined;
+type BenchmarkingPhase = {
+  action: 'uploading' | 'downloading';
+  currentValue: number;
 };
 
-type UploadSpeedStats = {
-  currentUploadSpeed: number;
-  averageUploadSpeed: number | undefined;
+type AverageResults = {
+  averageDownload: null | number;
+  averageUpload: null | number;
 };
 
 // io do not accept for some reason type string|undefined
 const backendURL = process.env['NEXT_PUBLIC_BACKEND_URL'] ?? '';
 
-export const useSpeedTest = () => {
-  const [downloadStats, setDownloadStats] = useState<DownloadSpeedStats | undefined>();
-  const [uploadStats, setUploadStats] = useState<UploadSpeedStats | undefined>();
-  const socket = useRef<socketio.Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+export const useSpeedTest = (timePerTest: number) => {
+  const [benchmarkingPhase, setBenchmarkingPhase] = useState<BenchmarkingPhase>();
+  const [averageResults, setAverageResults] = useState<AverageResults>({
+    averageUpload: null,
+    averageDownload: null,
+  });
+  const socketRef = useRef<socketio.Socket<ServerToClientEvents, ClientToServerEvents> | null>(
+    null,
+  );
 
   useEffect(() => {
     console.log('Initializing new socket');
-    socket.current = socketio.connect(backendURL, { forceNew: true });
+    socketRef.current = socketio.connect(backendURL, { forceNew: true });
 
     return () => {
       console.log('Disconnecting socket');
-      socket.current?.disconnect();
+      socketRef.current?.disconnect();
     };
   }, []);
 
-  const startDownloadTest = async () => {
+  const downloadSpeed = async () => {
     console.log('Download speed test');
-    if (socket.current === null) {
+    if (socketRef.current === null) {
       console.error('Socket is null!');
       return;
     }
 
-    const chunkSize = inCSUnits(50, 'MB');
-    const result = await timeDownloadChunk(socket.current, chunkSize);
-    console.log(throughput(chunkSize, result));
+    const chunkSize = inCSUnits(20, 'MB');
+    const timeThreshold = timePerTest * 1000;
+    const pastResults: Array<number> = [];
+
+    const throttledUpdate = throttle(() => {
+      setBenchmarkingPhase({ action: 'downloading', currentValue: round(mean(pastResults)) });
+    }, 1000);
+
+    let cumulativeTime = 0;
+    while (cumulativeTime < timeThreshold) {
+      const timeDelta = await timeDownloadChunk(socketRef.current, chunkSize);
+      //TODO: Adaptative chunk size
+      pastResults.push(throughput(chunkSize, timeDelta));
+      throttledUpdate();
+
+      cumulativeTime += timeDelta;
+    }
+    setBenchmarkingPhase({ action: 'downloading', currentValue: round(mean(pastResults)) });
+    setAverageResults((prevState) => ({ ...prevState, averageDownload: round(mean(pastResults)) }));
   };
 
-  const startUploadTest = () => {
-    console.log('Upload speed test');
+  const startSpeedTest = async () => {
+    if (socketRef.current === null) {
+      console.error('Socket is null!');
+      return;
+    }
+
+    await downloadSpeed();
   };
 
-  return { downloadStats, uploadStats, startDownloadTest, startUploadTest };
+  return { benchmarkingPhase, averageResults, startSpeedTest };
 };
