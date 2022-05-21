@@ -25,6 +25,7 @@ const logger = log4js.getLogger();
 const io = new Server<ClientToServerEvents, ServerToClientEvents>({
   path: '/',
   cors: { origin: process.env['FRONTEND_URL'] },
+  maxHttpBufferSize: 1e8,
 });
 
 io.on('connection', (socket) => {
@@ -35,10 +36,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on('requestBytes', (count) => {
-    console.log(`Sending ${count} random bytes`);
+    logger.trace(`Sending ${count} random bytes`);
     //Precalculating bytes
     const bytes = crypto.randomBytes(count);
     socket.emit('receiveBytes', Date.now(), bytes);
+  });
+
+  socket.on('uploadBytes', () => {
+    logger.trace('Uploading bytes');
+    socket.emit('uploadTime', Date.now());
   });
 
 });

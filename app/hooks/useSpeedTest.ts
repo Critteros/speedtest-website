@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as socketio from 'socket.io-client';
 import type { ServerToClientEvents, ClientToServerEvents } from '@backend/types/socket';
-import { timeDownloadChunk, inCSUnits, throughput } from '../lib/socketUploadDownload';
+import {timeDownloadChunk, inCSUnits, throughput, timeUploadChunk} from '../lib/socketUploadDownload';
 import { throttle, mean, round } from 'lodash';
 
 type BenchmarkingPhase = {
@@ -65,13 +65,39 @@ export const useSpeedTest = (timePerTest: number) => {
     setAverageResults((prevState) => ({ ...prevState, averageDownload: round(mean(pastResults)) }));
   };
 
+  const uploadSpeed = async () => {
+    if (socketRef.current === null) {
+      console.error('Socket is null!');
+      return;
+    }
+    const chunkSize = inCSUnits(20, 'MB');
+    const timeThreshold = timePerTest * 1000;
+    const pastResults: Array<number> = [];
+
+    const throttledUpdate = throttle(() => {
+      setBenchmarkingPhase({ action: 'uploading', currentValue: round(mean(pastResults)) });
+    }, 1000);
+
+    let cumulativeTime = 0;
+    while (cumulativeTime < timeThreshold) {
+      const timeDelta = await timeUploadChunk(socketRef.current, chunkSize);
+      //TODO: Adaptative chunk size
+      pastResults.push(throughput(chunkSize, timeDelta));
+      throttledUpdate();
+
+      cumulativeTime += timeDelta;
+    }
+    setBenchmarkingPhase({ action: 'uploading', currentValue: round(mean(pastResults)) });
+    setAverageResults((prevState) => ({ ...prevState, averageUpload: round(mean(pastResults)) }));
+  }
+
   const startSpeedTest = async () => {
     if (socketRef.current === null) {
       console.error('Socket is null!');
       return;
     }
 
-    await downloadSpeed();
+    await uploadSpeed();
   };
 
   return { benchmarkingPhase, averageResults, startSpeedTest };

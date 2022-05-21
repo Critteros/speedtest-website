@@ -5,5 +5,5 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   requestBytes: (count: number) => void;
-  uploadBytes: (count: number) => void;
+  uploadBytes: (data: Buffer) => void;
 }
