@@ -2,6 +2,7 @@ import Gauge from '../atoms/Gauge';
 import StopRestartControls from '../molecules/StopRestartControls';
 import * as socketio from 'socket.io-client';
 import { useEffect } from 'react';
+import { useSpeedTest } from '../../hooks/useSpeedTest';
 
 type Props = {
   className?: string;
@@ -9,16 +10,13 @@ type Props = {
   colors?: string[];
 };
 
-// io do not accept for some reason type string|undefined
-const backendURL = process.env['NEXT_PUBLIC_BACKEND_URL'] ?? '';
-const socket = socketio.connect(backendURL);
-
 const SpeedtestUI = ({ className, id, colors }: Props) => {
+  const { startDownloadTest } = useSpeedTest();
+
   useEffect(() => {
-    const backendUrl = process.env['NEXT_PUBLIC_BACKEND_URL'];
-    socket.emit('TEST', 'data');
-    console.log(socket.active);
-    console.log(backendUrl);
+    (async () => {
+      await startDownloadTest();
+    })();
   }, []);
   return (
     <div className={`flex flex-col items-center justify-center ${className ? className : ''}`}>
