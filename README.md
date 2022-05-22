@@ -1,23 +1,47 @@
-# Next.js + Tailwind CSS Example
+# SpeedTest
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v3.0)](https://tailwindcss.com/blog/tailwindcss-v3) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
+Simple speedtest application which measures both download speed and upload speed.
+Under the hood it uses websockets to upload and download chunks of data. Response times are measured to than calculate total bandwidth.
+Speedtest is automatically run when visiting website.
 
-## Deploy your own
+## 🔧 Technologies
+![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
+![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101)
 
-## How to use
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
+## Screenshots
 
-```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
-# or
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
-# or
-pnpm create next-app -- --example with-tailwindcss with-tailwindcss-app
-```
+### Desktop
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+Download Test
+![](readme-resources/Desktop_Download.png)
+
+Upload test
+![](readme-resources/Desktop_Upload.png)
+
+Results screen
+![](readme-resources/Desktop_Results.png)
+
+### Mobile
+
+Download Test
+![](readme-resources/Mobile_Download.png)
+
+Upload test
+![](readme-resources/Mobile_Upload.png)
+
+Results screen
+![](readme-resources/Mobile_Results.png)
+
+## Setup
+
+1. Clone this repository
+2. In app directory create .env-local with NEXT_PUBLIC_BACKEND_URL variable that points to backend server
+3. Install packages with preferentially yarn
+4. In server directory create .env file with PORT and FRONTEND_URL variables
+5. Install server packages
+6. For both server and app directories run first build script and then start script
