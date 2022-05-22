@@ -35,8 +35,9 @@ const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Pr
   const onRestart = useCallback(() => {
     stopSpeedTest();
 
-    // This timeout is necessary to ensure all asynchronous speedtest cancellation happen
-    // without this timeout on every restart call more ram would be used up in exponential rate
+    // This should be fine because we are in useCallback with well-defined dependency array
+    // I would advise not to remove this for UX and also possible race condition when cancelling previous speedtest
+    // stopSpeedTest() must have some time to properly stop speedtest
     setTimeout(() => {
       (async () => {
         await startSpeedTest();

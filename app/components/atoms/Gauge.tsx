@@ -1,6 +1,6 @@
 import GaugeChart from 'react-gauge-chart';
-import { createLogScale } from '../../lib/scaling';
 import { useMemo } from 'react';
+import { createLogScale } from '../../lib/utils';
 
 type Props = {
   className?: string;
