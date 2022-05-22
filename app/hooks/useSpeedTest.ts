@@ -32,6 +32,7 @@ export const useSpeedTest = (timePerTest: number) => {
     averageDownload: null,
   });
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const isCancelledRef = useRef<boolean>(false);
 
   useEffect(() => {
     console.log('Initializing new socket');
@@ -55,7 +56,7 @@ export const useSpeedTest = (timePerTest: number) => {
       const pastResults: Array<number> = [];
 
       let cumulativeTime = 0;
-      while (cumulativeTime < timeThreshold) {
+      while (!isCancelledRef.current && cumulativeTime < timeThreshold) {
         const timeDelta =
           type === 'uploading'
             ? await timeUploadChunk(socketRef.current, chunkSize)
@@ -66,22 +67,24 @@ export const useSpeedTest = (timePerTest: number) => {
         cumulativeTime += timeDelta;
       }
 
-      setBenchmarkingPhase({ action: type, currentValue: round(mean(pastResults)) });
+      const finalValue = pastResults.length > 0 ? round(mean(pastResults)) : 0;
+      setBenchmarkingPhase({ action: type, currentValue: finalValue });
 
       switch (type) {
         case 'uploading':
           setAverageResults((prevState) => ({
             ...prevState,
-            averageUpload: round(mean(pastResults)),
+            averageUpload: finalValue,
           }));
           break;
         case 'downloading':
           setAverageResults((prevState) => ({
             ...prevState,
-            averageDownload: round(mean(pastResults)),
+            averageDownload: finalValue,
           }));
           break;
       }
+      if (isCancelledRef.current) setBenchmarkingPhase('finished');
     },
     [timePerTest],
   );
@@ -92,11 +95,17 @@ export const useSpeedTest = (timePerTest: number) => {
       return;
     }
 
+    isCancelledRef.current = false;
+    setBenchmarkingPhase({ action: 'downloading', currentValue: 0 });
     await performTest('downloading');
     setBenchmarkingPhase({ action: 'uploading', currentValue: 0 });
     await performTest('uploading');
     setBenchmarkingPhase('finished');
   }, [performTest]);
 
-  return { benchmarkingPhase, averageResults, startSpeedTest };
+  const stopSpeedTest = useCallback(() => {
+    isCancelledRef.current = true;
+  }, []);
+
+  return { benchmarkingPhase, averageResults, startSpeedTest, stopSpeedTest };
 };

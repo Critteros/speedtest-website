@@ -1,6 +1,5 @@
 import Gauge from '../atoms/Gauge';
-import StopRestartControls from '../molecules/StopRestartControls';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSpeedTest } from '../../hooks/useSpeedTest';
 import DownloadUploadMeters from '../molecules/DownloadUploadMeters';
 import Button from '../atoms/Button';
@@ -13,13 +12,26 @@ type Props = {
 };
 
 const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Props) => {
-  const { startSpeedTest, benchmarkingPhase, averageResults } = useSpeedTest(10);
+  const { startSpeedTest, benchmarkingPhase, averageResults, stopSpeedTest } = useSpeedTest(10);
 
   useEffect(() => {
     (async () => {
       await startSpeedTest();
     })();
-  }, [startSpeedTest]);
+
+    return () => {
+      stopSpeedTest();
+    };
+  }, [startSpeedTest, stopSpeedTest]);
+
+  const onRestart = useCallback(() => {
+    stopSpeedTest();
+    setTimeout(() => {
+      (async () => {
+        await startSpeedTest();
+      })();
+    }, 200);
+  }, [stopSpeedTest, startSpeedTest]);
 
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className ?? ''}`}>
@@ -34,14 +46,9 @@ const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Pr
             className="w-full sm:w-11/12"
             value={benchmarkingPhase.currentValue}
           />
-          <StopRestartControls
-            onRestart={() => {
-              console.log('Restart Clicked');
-            }}
-            onStop={() => {
-              console.log('Stop Clicked');
-            }}
-          />
+          <Button className="mt-3" type="stop" onClick={stopSpeedTest}>
+            STOP
+          </Button>
         </>
       )}
 
@@ -52,13 +59,7 @@ const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Pr
       />
 
       {benchmarkingPhase === 'finished' && (
-        <Button
-          onClick={() => {
-            console.log('Restart Clicked');
-          }}
-          className="mt-7"
-          type={'restart'}
-        >
+        <Button onClick={onRestart} className="mt-7" type={'restart'}>
           RESTART
         </Button>
       )}
