@@ -29,6 +29,3 @@ Restart.args = {
   label: 'RESTART',
   type: 'restart',
 };
-
-// export const Stop = () => <Button label="STOP" type="stop" />;
-// export const Restart = () => <Button label="RESTART" type="restart" />;
