@@ -10,6 +10,8 @@ type Props = {
   minValue?: number;
   maxValue: number;
   postfix?: string;
+  needleColor?: string;
+  textStyles?: string;
 };
 
 /**
@@ -21,9 +23,21 @@ type Props = {
  * @param minValue
  * @param maxValue
  * @param postfix string added to the end of value under gauge
+ * @param needleColor color of the needle
+ * @param textStyles extra classes to style text
  * @constructor
  */
-const Gauge = ({ className, id, colors, value, minValue = 0, maxValue, postfix }: Props) => {
+const Gauge = ({
+  className,
+  id,
+  colors,
+  value,
+  minValue = 0,
+  maxValue,
+  postfix,
+  needleColor = 'white',
+  textStyles,
+}: Props) => {
   const scalingFunction = useMemo(() => createLogScale(minValue, maxValue), [minValue, maxValue]);
   return (
     <div className={`flex flex-col items-center justify-center gap-2  ${className ?? ''}`}>
@@ -36,12 +50,12 @@ const Gauge = ({ className, id, colors, value, minValue = 0, maxValue, postfix }
         hideText={true}
         percent={scalingFunction(Math.round(value))}
         marginInPercent={0}
-        needleColor={'white'}
+        needleColor={needleColor}
         needleBaseColor={'rgba(0,0,0,0%)'}
       />
-      <span className="text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl">{`${value} ${
-        postfix ?? ''
-      }`}</span>
+      <span
+        className={`text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl ${textStyles ?? ''}`}
+      >{`${value} ${postfix ?? ''}`}</span>
     </div>
   );
 };
