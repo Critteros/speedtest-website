@@ -21,21 +21,6 @@ const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Pr
     })();
   }, [startSpeedTest]);
 
-  // if (benchmarkingPhase === 'finished') {
-  // return (
-  //   <div className={`flex flex-col items-center justify-center gap-4 ${className ?? ''}`}>
-  //     <DownloadUploadMeters
-  //       className="mt-7"
-  //       downloadSpeed={`${averageResults.averageDownload ?? '---'} Mb/s`}
-  //       uploadSpeed={`${averageResults.averageUpload ?? '---'} Mb/s`}
-  //     />
-  //     <Button className="mt-7" type={'restart'}>
-  //       RESTART
-  //     </Button>
-  //   </div>
-  // );
-  // }
-
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className ?? ''}`}>
       {benchmarkingPhase !== 'finished' && (
@@ -49,7 +34,14 @@ const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Pr
             className="w-full sm:w-11/12"
             value={benchmarkingPhase.currentValue}
           />
-          <StopRestartControls />
+          <StopRestartControls
+            onRestart={() => {
+              console.log('Restart Clicked');
+            }}
+            onStop={() => {
+              console.log('Stop Clicked');
+            }}
+          />
         </>
       )}
 
@@ -60,7 +52,13 @@ const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Pr
       />
 
       {benchmarkingPhase === 'finished' && (
-        <Button className="mt-7" type={'restart'}>
+        <Button
+          onClick={() => {
+            console.log('Restart Clicked');
+          }}
+          className="mt-7"
+          type={'restart'}
+        >
           RESTART
         </Button>
       )}
