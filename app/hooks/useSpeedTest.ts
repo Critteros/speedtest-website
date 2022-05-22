@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import * as socketio from 'socket.io-client';
-import type { ServerToClientEvents, ClientToServerEvents } from '@backend/types/socket';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { connect, Socket } from 'socket.io-client';
+import type { ClientToServerEvents, ServerToClientEvents } from '@backend/types/socket';
 import {
-  timeDownloadChunk,
   inCSUnits,
   throughput,
+  timeDownloadChunk,
   timeUploadChunk,
 } from '../lib/socketUploadDownload';
 import { mean, round } from 'lodash';
@@ -31,13 +31,11 @@ export const useSpeedTest = (timePerTest: number) => {
     averageUpload: null,
     averageDownload: null,
   });
-  const socketRef = useRef<socketio.Socket<ServerToClientEvents, ClientToServerEvents> | null>(
-    null,
-  );
+  const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
 
   useEffect(() => {
     console.log('Initializing new socket');
-    socketRef.current = socketio.connect(backendURL);
+    socketRef.current = connect(backendURL);
 
     return () => {
       console.log('Disconnecting socket');

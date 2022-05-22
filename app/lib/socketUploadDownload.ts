@@ -1,6 +1,6 @@
-import type { ServerToClientEvents, ClientToServerEvents } from '@backend/types/socket';
+import type { ClientToServerEvents, ServerToClientEvents } from '@backend/types/socket';
 import { Socket } from 'socket.io-client';
-import * as crypto from 'crypto';
+import { randomBytes } from 'crypto';
 
 type UnitsType = 'B' | 'KB' | 'MB' | 'GB';
 
@@ -22,10 +22,10 @@ export const timeUploadChunk = (
   socket: Socket<ServerToClientEvents, ClientToServerEvents>,
   chunkSize: number,
 ) => {
-  const randomBytes = crypto.randomBytes(chunkSize);
+  const bytes = randomBytes(chunkSize);
 
   const uploadStart = Date.now();
-  socket.emit('uploadBytes', randomBytes);
+  socket.emit('uploadBytes', bytes);
 
   return new Promise<number>((resolve) => {
     socket.once('uploadTime', (timestamp) => {
