@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { connect, Socket } from 'socket.io-client';
 import type { ClientToServerEvents, ServerToClientEvents } from '@backend/types/socket';
-import {
-  inCSUnits,
-  throughput,
-  timeDownloadChunk,
-  timeUploadChunk,
-} from '../lib/socketUploadDownload';
+import { inCSUnits, throughput } from '../lib/utils';
 import { mean, round } from 'lodash';
+import { randomBytes } from 'crypto';
 
 type BenchmarkingPhase = {
   action: 'uploading' | 'downloading';
@@ -63,20 +59,77 @@ export const useSpeedTest = (timePerTest: number) => {
       const timeThreshold = timePerTest * 1000;
       const pastResults: Array<number> = [];
 
-      let cumulativeTime = 0;
-      while (!isCancelledRef.current && cumulativeTime < timeThreshold) {
-        const timeDelta =
-          type === 'uploading'
-            ? await timeUploadChunk(socketRef.current, chunkSize)
-            : await timeDownloadChunk(socketRef.current, chunkSize);
-        pastResults.push(throughput(chunkSize, timeDelta));
-        setBenchmarkingPhase({ action: type, currentValue: round(mean(pastResults)) });
+      /*
+        Download Test:
+        Client --- RequestBytes(timestamp, dataAmount) --> Server
+        Server --- BytesReceived(clientTimeStamp, data) --> Client
 
-        cumulativeTime += timeDelta;
+        Upload test:
+        Client --- RequestUpload(timestamp, data) --> Server
+        Server --- UploadComplete(timeDelta) --> Client
+
+        */
+      if (!isCancelledRef.current) {
+        switch (type) {
+          case 'downloading': {
+            socketRef.current?.volatile.on('bytesReceived', (clientTimeStamp) => {
+              const currentTime = Date.now();
+              pastResults.push(throughput(chunkSize, currentTime - clientTimeStamp));
+              setBenchmarkingPhase({ action: type, currentValue: round(mean(pastResults)) });
+            });
+
+            await new Promise<void>((resolve) => {
+              const handle = setInterval(() => {
+                if (isCancelledRef.current) {
+                  clearInterval(handle);
+                  resolve();
+                  return;
+                }
+                socketRef.current?.emit('requestBytes', Date.now(), chunkSize);
+              }, 300);
+
+              setTimeout(() => {
+                clearInterval(handle);
+                resolve();
+              }, timeThreshold);
+            });
+
+            socketRef.current?.volatile.off('bytesReceived');
+            break;
+          }
+
+          case 'uploading': {
+            socketRef.current?.volatile.on('uploadComplete', (timeDelta) => {
+              pastResults.push(throughput(chunkSize, timeDelta));
+              setBenchmarkingPhase({ action: type, currentValue: round(mean(pastResults)) });
+            });
+
+            const bytes = randomBytes(chunkSize);
+
+            await new Promise<void>((resolve) => {
+              const handle = setInterval(() => {
+                if (isCancelledRef.current) {
+                  clearInterval(handle);
+                  resolve();
+                  return;
+                }
+                socketRef.current?.emit('requestUpload', Date.now(), bytes);
+              }, 300);
+
+              setTimeout(() => {
+                clearInterval(handle);
+                resolve();
+              }, timeThreshold);
+            });
+
+            socketRef.current?.volatile.off('uploadComplete');
+            break;
+          }
+        }
       }
 
       const finalValue = pastResults.length > 0 ? round(mean(pastResults)) : 0;
-      setBenchmarkingPhase({ action: type, currentValue: finalValue });
+      // setBenchmarkingPhase({action: type, currentValue: finalValue});
 
       switch (type) {
         case 'uploading':

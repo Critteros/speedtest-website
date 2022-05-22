@@ -26,29 +26,41 @@ const logger = log4js.getLogger();
 const io = new Server<ClientToServerEvents, ServerToClientEvents>({
   path: '/',
   cors: { origin: process.env['FRONTEND_URL'] },
+  // cors: { origin: '*' },
   maxHttpBufferSize: 1e8,
+
 });
 
 // Client connection
 io.on('connection', (socket) => {
   logger.info(`New connection from ${socket.handshake.address}`);
 
+
+  /*
+  Download Test:
+  Client --- RequestBytes(timestamp, dataAmount) --> Server
+  Server --- BytesReceived(clientTimeStamp, data) --> Client
+
+  Upload test:
+  Client --- RequestUpload(timestamp, data) --> Server
+  Server --- UploadComplete(timeDelta) --> Client
+
+   */
+
+  socket.volatile.on('requestUpload', (timestamp) => {
+    const currentTime = Date.now();
+    logger.trace('Uploading bytes');
+    socket.emit('uploadComplete', currentTime - timestamp);
+  });
+
+  socket.volatile.on('requestBytes', (timestamp, dataAmount) => {
+    const data = crypto.randomBytes(dataAmount);
+    logger.trace(`Sending ${dataAmount} random bytes`);
+    socket.emit('bytesReceived', timestamp, data);
+  });
+
   socket.on('disconnect', (reason) => {
     logger.info(`Disconnected reason: ${reason}`);
-  });
-
-  // Upload bytes to client
-  socket.on('requestBytes', (count) => {
-    logger.trace(`Sending ${count} random bytes`);
-    //Precalculating bytes
-    const bytes = crypto.randomBytes(count);
-    socket.emit('receiveBytes', Date.now(), bytes);
-  });
-
-  // Receive bytes from client (discard bytes)
-  socket.on('uploadBytes', () => {
-    logger.trace('Uploading bytes');
-    socket.emit('uploadTime', Date.now());
   });
 
 });
