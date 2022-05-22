@@ -4,6 +4,11 @@ import { randomBytes } from 'crypto';
 
 type UnitsType = 'B' | 'KB' | 'MB' | 'GB';
 
+/**
+ * Download single block of given chunkSize
+ * @param socket socket to use
+ * @param chunkSize how many bytes to download
+ */
 export const timeDownloadChunk = (
   socket: Socket<ServerToClientEvents, ClientToServerEvents>,
   chunkSize: number,
@@ -18,6 +23,11 @@ export const timeDownloadChunk = (
   });
 };
 
+/**
+ * Uploads single block of random data of given size
+ * @param socket socket to use
+ * @param chunkSize how many bytes to upload
+ */
 export const timeUploadChunk = (
   socket: Socket<ServerToClientEvents, ClientToServerEvents>,
   chunkSize: number,
@@ -34,6 +44,11 @@ export const timeUploadChunk = (
   });
 };
 
+/**
+ * Helper function to return number of bytes from CS unit like 1MB
+ * @param count
+ * @param unit
+ */
 export const inCSUnits = (count: number, unit: UnitsType) => {
   switch (unit) {
     case 'B':
@@ -47,6 +62,11 @@ export const inCSUnits = (count: number, unit: UnitsType) => {
   }
 };
 
+/**
+ * Calculates throughput from time that took count bytes to transfer
+ * @param count number ob bytes transferred
+ * @param timeDelta time that these bytes took to transfer
+ */
 export const throughput = (count: number, timeDelta: number) => {
   const perSecond = 1000 / timeDelta;
   const bytesPerSecond = count * perSecond;

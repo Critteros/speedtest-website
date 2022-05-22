@@ -19,9 +19,13 @@ type AverageResults = {
   averageUpload: null | number;
 };
 
-// io do not accept for some reason type string|undefined
+// For some reason socket.io doesn't accept type string | undefined in its constructor
 const backendURL = process.env['NEXT_PUBLIC_BACKEND_URL'] ?? '';
 
+/**
+ * This hook implement speed-testing logic
+ * @param timePerTest time in second that upload and upload test will take separate, WARNING this value should be constant to avoid rerenders
+ */
 export const useSpeedTest = (timePerTest: number) => {
   const [benchmarkingPhase, setBenchmarkingPhase] = useState<BenchmarkingPhase | 'finished'>({
     action: 'downloading',
@@ -32,8 +36,11 @@ export const useSpeedTest = (timePerTest: number) => {
     averageDownload: null,
   });
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  // Used to cancel speedtest, we don't want rerender when changing this value
   const isCancelledRef = useRef<boolean>(false);
 
+  // Used to initialize and deinitialize socket
+  // each speedtest should have its own instance of socket
   useEffect(() => {
     console.log('Initializing new socket');
     socketRef.current = connect(backendURL);
@@ -44,6 +51,7 @@ export const useSpeedTest = (timePerTest: number) => {
     };
   }, []);
 
+  // Function that will perform upload or download speed test
   const performTest = useCallback(
     async (type: 'uploading' | 'downloading') => {
       if (socketRef.current === null) {
@@ -89,6 +97,8 @@ export const useSpeedTest = (timePerTest: number) => {
     [timePerTest],
   );
 
+  // handle with care, I have encountered many bugs using this function that end up in massive memory leaks leading to 100% ram usage on host
+  // I cannot explain cause of these bugs, just be aware of them
   const startSpeedTest = useCallback(async () => {
     if (socketRef.current === null) {
       console.error('Socket is null!');
@@ -103,6 +113,7 @@ export const useSpeedTest = (timePerTest: number) => {
     setBenchmarkingPhase('finished');
   }, [performTest]);
 
+  // used to stop speedtest
   const stopSpeedTest = useCallback(() => {
     isCancelledRef.current = true;
   }, []);

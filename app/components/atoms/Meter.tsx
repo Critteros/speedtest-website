@@ -6,6 +6,13 @@ type Props = {
   type: 'download' | 'upload';
 };
 
+/**
+ * Meter that will present upload or download average value
+ * @param className extra classes to style outer div
+ * @param text text to be displayed on meter
+ * @param type either download or upload meter
+ * @constructor
+ */
 const Meter = ({ className, text, type }: Props) => {
   return (
     <div
@@ -13,7 +20,7 @@ const Meter = ({ className, text, type }: Props) => {
         type === 'download'
           ? 'bg-gradient-to-tr from-green-600 to-green-300'
           : 'bg-gradient-to-tr from-violet-500 to-pink-500'
-      }  p-2 ${className || ''}`}
+      }  p-2 ${className ?? ''}`}
     >
       {type === 'download' ? (
         <DownloadIcon className="h-8 w-8" color="#fff" />
