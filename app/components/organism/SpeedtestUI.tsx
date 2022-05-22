@@ -1,36 +1,36 @@
 import Gauge from '../atoms/Gauge';
 import StopRestartControls from '../molecules/StopRestartControls';
-import * as socketio from 'socket.io-client';
 import { useEffect } from 'react';
 import { useSpeedTest } from '../../hooks/useSpeedTest';
 
 type Props = {
   className?: string;
   id: string;
-  colors?: string[];
+  downloadTestColors?: string[];
+  uploadTestColors?: string[];
 };
 
-const SpeedtestUI = ({ className, id, colors }: Props) => {
+const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Props) => {
   const { startSpeedTest, benchmarkingPhase } = useSpeedTest(10);
 
   useEffect(() => {
     (async () => {
       await startSpeedTest();
     })();
-  }, []);
+  }, [startSpeedTest]);
 
-  const gaugeValue = benchmarkingPhase?.currentValue || 0;
+  if (benchmarkingPhase === 'finished') {
+    return <div></div>;
+  }
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center gap-3 ${className ? className : ''}`}
-    >
+    <div className={`flex flex-col items-center justify-center gap-3 ${className || ''}`}>
       <Gauge
         id={id}
-        colors={colors}
+        colors={benchmarkingPhase.action === 'downloading' ? downloadTestColors : uploadTestColors}
         maxValue={1000}
         className="w-full sm:w-11/12"
-        value={gaugeValue}
+        value={benchmarkingPhase.currentValue}
       />
       <StopRestartControls />
     </div>

@@ -9,26 +9,32 @@ type ButtonProps = {
   className?: string;
 };
 
-const Button = ({ children, type }: ButtonProps) => {
-  if (type === 'stop') {
-    return (
-      <button className="flex items-center justify-between gap-2 rounded-md bg-red-700 p-2 font-bold uppercase text-white">
-        <StopIcon className="w-6" />
-        {children}
-      </button>
-    );
-  }
+const Button = ({ children, type, className }: ButtonProps) => {
+  switch (type) {
+    case 'restart':
+      return (
+        <button
+          className={`flex items-center justify-between gap-2 rounded-md bg-blue-700 p-2 font-bold uppercase text-white ${
+            className || ''
+          }`}
+        >
+          <RefreshIcon className="w-6" />
+          {children}
+        </button>
+      );
 
-  if (type === 'restart') {
-    return (
-      <button className="flex items-center justify-between gap-2 rounded-md bg-blue-700 p-2 font-bold uppercase text-white">
-        <RefreshIcon className="w-6" />
-        {children}
-      </button>
-    );
+    case 'stop':
+      return (
+        <button
+          className={`flex items-center justify-between gap-2 rounded-md bg-red-700 p-2 font-bold uppercase text-white ${
+            className || ''
+          }`}
+        >
+          <StopIcon className="w-6" />
+          {children}
+        </button>
+      );
   }
-
-  return <button>{children}</button>;
 };
 
 export default Button;
