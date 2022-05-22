@@ -11,6 +11,7 @@ export default {
     needleColor: { description: 'Needle color' },
     textStyles: { description: 'Extra style classes for text', table: { control: false } },
     postfix: { description: 'Postfix added to text below gauge', control: 'text' },
+    className: { table: { disable: true } },
   },
 };
 

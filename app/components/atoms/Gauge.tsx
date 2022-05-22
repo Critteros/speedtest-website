@@ -28,16 +28,16 @@ type Props = {
  * @constructor
  */
 const Gauge = ({
-                 className,
-                 id,
-                 colors,
-                 value,
-                 minValue = 0,
-                 maxValue,
-                 postfix,
-                 needleColor = 'white',
-                 textStyles,
-               }: Props) => {
+  className,
+  id,
+  colors,
+  value,
+  minValue = 0,
+  maxValue,
+  postfix,
+  needleColor = 'white',
+  textStyles,
+}: Props) => {
   const scalingFunction = useMemo(() => createLogScale(minValue, maxValue), [minValue, maxValue]);
   return (
     <div className={`flex flex-col items-center justify-center gap-2  ${className ?? ''}`}>

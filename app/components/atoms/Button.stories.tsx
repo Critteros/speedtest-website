@@ -7,8 +7,7 @@ export default {
   component: Button,
   argTypes: {
     className: {
-      table: { control: false },
-      description: 'Extra classes to style component',
+      table: { disable: true },
     },
     label: { control: 'text', description: 'Text to be displayed on the button' },
     type: { description: 'Button type' },

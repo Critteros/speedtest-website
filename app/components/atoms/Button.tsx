@@ -18,7 +18,7 @@ type ButtonProps = {
  * @param onClick on click callback
  * @constructor
  */
-const Button = ({type, className, onClick, label}: ButtonProps) => {
+const Button = ({ type, className, onClick, label }: ButtonProps) => {
   return (
     <button
       className={`flex items-center justify-between gap-2 rounded-md p-2 transition duration-150 ease-in-out hover:translate-y-0.5 active:translate-y-1  ${
@@ -28,8 +28,8 @@ const Button = ({type, className, onClick, label}: ButtonProps) => {
       }`}
       onClick={onClick}
     >
-      {type === 'stop' && <StopIcon className="w-6 text-white"/>}
-      {type === 'restart' && <RefreshIcon className="w-6 text-white"/>}
+      {type === 'stop' && <StopIcon className="w-6 text-white" />}
+      {type === 'restart' && <RefreshIcon className="w-6 text-white" />}
 
       <span className="font-bold uppercase text-white">{label}</span>
     </button>
