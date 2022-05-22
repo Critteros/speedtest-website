@@ -59,9 +59,7 @@ const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Pr
             value={benchmarkingPhase.currentValue}
             postfix="Mb/s"
           />
-          <Button className="mt-3" type="stop" onClick={stopSpeedTest}>
-            STOP
-          </Button>
+          <Button className="mt-3" type="stop" onClick={stopSpeedTest} label="STOP" />
         </>
       )}
 
@@ -72,9 +70,7 @@ const SpeedtestUI = ({ className, id, downloadTestColors, uploadTestColors }: Pr
       />
 
       {benchmarkingPhase === 'finished' && (
-        <Button onClick={onRestart} className="mt-7" type={'restart'}>
-          RESTART
-        </Button>
+        <Button onClick={onRestart} className="mt-7" type={'restart'} label="RESTART" />
       )}
     </div>
   );

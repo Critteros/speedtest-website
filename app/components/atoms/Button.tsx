@@ -4,10 +4,10 @@ import { RefreshIcon, StopIcon } from '@heroicons/react/solid';
 type ButtonType = 'stop' | 'restart';
 
 type ButtonProps = {
-  children?: React.ReactNode;
   type: ButtonType;
   className?: string;
-  onClick: () => void;
+  onClick?: () => void;
+  label?: string;
 };
 
 /**
@@ -18,20 +18,20 @@ type ButtonProps = {
  * @param onClick on click callback
  * @constructor
  */
-const Button = ({ children, type, className, onClick }: ButtonProps) => {
+const Button = ({type, className, onClick, label}: ButtonProps) => {
   return (
     <button
-      className={`flex items-center justify-between gap-2 rounded-md p-2 font-bold uppercase text-white transition duration-150 ease-in-out hover:translate-y-0.5 active:translate-y-1  ${
+      className={`flex items-center justify-between gap-2 rounded-md p-2 transition duration-150 ease-in-out hover:translate-y-0.5 active:translate-y-1  ${
         className ?? ''
       } ${type === 'restart' ? 'bg-blue-700 active:bg-blue-800' : ''} ${
         type === 'stop' ? 'bg-red-700 active:bg-red-800' : ''
       }`}
       onClick={onClick}
     >
-      {type === 'stop' && <StopIcon className="w-6" />}
-      {type === 'restart' && <RefreshIcon className="w-6" />}
+      {type === 'stop' && <StopIcon className="w-6 text-white"/>}
+      {type === 'restart' && <RefreshIcon className="w-6 text-white"/>}
 
-      {children}
+      <span className="font-bold uppercase text-white">{label}</span>
     </button>
   );
 };
